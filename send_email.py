@@ -28,7 +28,7 @@ def get_gmail_service():
     return build('gmail', 'v1', credentials=creds)
 
 
-def create_amp_email(to_email):
+def create_amp_email(to_email):   
     message = MIMEMultipart('alternative')
     message['To'] = to_email
     message['From'] = "me"
