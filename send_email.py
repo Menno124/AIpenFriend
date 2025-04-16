@@ -116,6 +116,47 @@ def create_amp_email(to_email):
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     return {'raw': raw_message}
 
+def reply_to_email(to_email, thread_id, subject="Re: PenFriend", original_message_id=None):
+    service = get_gmail_service()
+
+    message = MIMEMultipart('alternative')
+    message['To'] = to_email
+    message['From'] = "aipenfriendru@gmail.com"
+    message['Subject'] = subject
+
+    if original_message_id:
+        message['In-Reply-To'] = original_message_id
+        message['References'] = original_message_id
+
+    plain_text = "Thanks for your email! Here's a follow-up from PenFriend 🤖."
+
+    html_text = """
+    <html>
+      <body>
+        <p>This is a <b>reply</b> to your message via PenFriend. We'll be in touch!</p>
+      </body>
+    </html>
+    """
+
+    message.attach(MIMEText(plain_text, 'plain'))
+    message.attach(MIMEText(html_text, 'html'))
+
+    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    try:
+        response = service.users().messages().send(
+            userId='me',
+            body={
+                'raw': raw_message,
+                'threadId': thread_id
+            }
+        ).execute()
+        print(f"📤 Replied to {to_email} in thread {thread_id}. Message ID: {response['id']}")
+        return response
+    except Exception as e:
+        print(f"❌ Failed to reply to {to_email}: {e}")
+        return None
+
 
 
 
